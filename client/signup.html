@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css" />
+    <script src="client.js"></script>
+    <title>Sign Up</title>
+</head>
+
+<body>
+    <h1>Sign Up to Lobstter</h1>
+    <div class="container">
+        <form method="post">
+            <input type="text" id="name" placeholder="Name" required="required" />
+            <input type="text" id="username" placeholder="Username" required="required" />
+            <input type="password" id="password" placeholder="Password" required="required" />
+            <button type="submit" class="reg">Sign Up</button>
+        </form>
+        <p>Already have an Account? Log In <a href="login.html">here</a></p>
+    </div>
+</body>
+
+</html>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #caf0f8;
+    }
+
+    h1 {
+        font-size: 50px;
+        color: #03045e;
+        text-align: center;
+        padding: 10px;
+    }
+
+    p {
+        font-size: 20px;
+        color: #03045e;
+        text-align: center;
+        padding: 10px;
+    }
+
+    p a {
+    color: #03045e;
+    text-decoration: none;
+    font-size: 20px;
+    transition: 0.5s;
+  }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 50px;
+    }
+
+    .post {
+        background-color: #caf0f8;
+        display: flex;
+        flex-direction: column;
+        color: #03045e;
+        border: 2px solid #03045e;
+    }
+
+    button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 10px;
+        transition: 0.5s;
+    }
+
+    .reg {
+        background-color: #caf0f8;
+        color: #03045e;
+        border: 2px solid #03045e;
+    }
+
+    input {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 10px;
+        transition: 0.5s;
+    }
+</style>

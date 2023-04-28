@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/style.css" />
+    <script src="client.js"></script>
+    <title>Login</title>
+</head>
+
+<body>
+    <h1>Log In to Lobstter</h1>
+    <div class="container">
+        <form method="post">
+            <input type="text" id="username" placeholder="Username" required="required" />
+            <input type="password" id="password" placeholder="Password" required="required" />
+            <button type="submit" id="login" class="log">Log In</button>
+        </form>
+        <p>Don't have an Account? Sign Up <a href="signup.html">here</a></p>
+    </div>
+</body>
+
+</html>
+
+<script>
+    //Source: https://github.com/SwitzerChees/simple-typescript-template
+    document.addEventListener("DOMContentLoaded", () => {
+        const inputLoginUsername = document.getElementById("username");
+        const inputLoginPassword = document.getElementById("password");
+        const buttonLogin = document.getElementById("login");
+        buttonLogin.addEventListener("click", async () => {
+            const username = inputLoginUsername.value;
+            const password = inputLoginPassword.value;
+
+            if (!username || !password) return
+            const response = await fetch("/login/token", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            })
+            const { token } = await response.json();
+
+            const secretResponse = await fetch("/hello/secure", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+            const { message } = await secretResponse.json();
+            console.log('Secure Message,', message);
+        });
+    });
+</script>
+
+<style>
+    body {
+        margin: 0;
+        padding: 0;
+        background-color: #caf0f8;
+    }
+
+    h1 {
+        font-size: 50px;
+        color: #03045e;
+        text-align: center;
+        padding: 10px;
+    }
+
+    p {
+        font-size: 20px;
+        color: #03045e;
+        text-align: center;
+        padding: 10px;
+    }
+
+    p a {
+        color: #03045e;
+        text-decoration: none;
+        font-size: 20px;
+        transition: 0.5s;
+    }
+
+    .container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin: 50px;
+    }
+
+    .post {
+        background-color: #caf0f8;
+        display: flex;
+        flex-direction: column;
+        color: #03045e;
+        border: 2px solid #03045e;
+    }
+
+    button {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 10px;
+        transition: 0.5s;
+    }
+
+    .log {
+        background-color: #03045e;
+        color: #caf0f8;
+        border: 2px solid #03045e;
+    }
+
+    input {
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 20px;
+        cursor: pointer;
+        margin: 10px;
+        transition: 0.5s;
+    }
+</style>
