@@ -8,15 +8,45 @@
     <link rel="stylesheet" href="/style.css" />
     <script src="client.js"></script>
     <title>Sign Up</title>
+    <script>
+        //Source: https://github.com/SwitzerChees/simple-typescript-template
+        //waits for the DOM to load before attaching event listeners to the "signup" button
+        document.addEventListener("DOMContentLoaded", () => {
+            const inputUsername = document.getElementById("username");
+            const inputPassword = document.getElementById("password");
+            const buttonSignup = document.getElementById("signup");
+            buttonSignup.addEventListener("click", async () => {
+                const username = inputUsername.value;
+                const password = inputPassword.value;
+
+                if (!username || !password) return
+                const response = await fetch("/login/token", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ username, password }),
+                })
+                const { token } = await response.json();
+
+                const secretResponse = await fetch("/hello/secure", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const { message } = await secretResponse.json();
+                console.log('Secure Message,', message);
+            });
+        });
+    </script>
 </head>
 
 <body>
     <h1>Sign Up to Lobstter</h1>
     <div class="container">
-        <input type="text" id="name" placeholder="Name" required="required" />
         <input type="text" id="username" placeholder="Username" required="required" />
         <input type="password" id="password" placeholder="Password" required="required" />
-        <button type="submit" class="reg">Sign Up</button>
+        <button id="signup" type="submit" class="reg">Sign Up</button>
         <p>Already have an Account? Log In <a href="login.html">here</a></p>
     </div>
 </body>
