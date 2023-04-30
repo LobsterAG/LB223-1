@@ -1,9 +1,12 @@
 import mariadb from 'mariadb'
 import { Pool } from 'mariadb'
-import { USER_TABLE, TWEET_TABLE } from './schema'
+import { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE } from './schema'
 
 export class Database {
-  // Properties
+  // It is only used internally by the constructor.
+  // This property is responsible for creating the database connection pool.
+  // The pool is a collection of connections to the database.
+  // The pool is used to execute queries.
   private _pool: Pool
   // Constructor
   constructor() {
@@ -16,20 +19,37 @@ export class Database {
     })
     this.initializeDBSchema()
   }
-  // Methods
+
+  // private because no expose
+  // It is only used internally by the constructor.
+  // This method is responsible for creating the database schema.
   private initializeDBSchema = async () => {
     console.log('Initializing DB schema...')
-    await this.executeSQL(USER_TABLE)
-    await this.executeSQL(TWEET_TABLE)
+    // Initialize the database schema
+    try {
+      await this._pool.query(USER_TABLE)
+      await this._pool.query(ROLE_TABLE)
+      await this._pool.query(TWEET_TABLE)
+      await this._pool.query(LIKES_TABLE)
+      await this._pool.query(DISLIKES_TABLE)
+      await this._pool.query(COMMENT_TABLE)
+      console.log('DB schema initialized!')
+    } catch (err) {
+      console.log(err)
+    }
   }
 
+  // used by the API class.
+  // This method is responsible for executing SQL queries.
   public executeSQL = async (query: string) => {
+    // Get a connection from the pool, execute the query, close the connection
     try {
       const conn = await this._pool.getConnection()
       const res = await conn.query(query)
       conn.end()
       return res
     } catch (err) {
+      // If there is an error, log it and return undefined
       console.log(err)
     }
   }
