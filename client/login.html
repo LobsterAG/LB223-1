@@ -15,6 +15,9 @@
             const inputUsername = document.getElementById("username");
             const inputPassword = document.getElementById("password");
             const buttonLogin = document.getElementById("login");
+            const loginForm = document.getElementById("login-form");
+            let loginRequest;
+            loginForm.addEventListener("submit", onLoginFormSubmitted);
             buttonLogin.addEventListener("click", async () => {
                 const username = inputUsername.value;
                 const password = inputPassword.value;
@@ -37,6 +40,32 @@
                 const { message } = await secretResponse.json();
                 console.log('Secure Message,', message);
             });
+
+            function onLoginFormSubmitted(event) {
+                event.preventDefault();
+
+                const loginData = {
+                    username: inputUsername.value,
+                    password: inputPassword.value
+                };
+
+                loginRequest = new XMLHttpRequest();
+                loginRequest.open("POST", "http://localhost:4200/login");
+                loginRequest.setRequestHeader("Content-Type", "application/json");
+                loginRequest.onreadystatechange = onLoginResponse;
+                loginRequest.send(JSON.stringify(loginData));
+            }
+
+            function onLoginResponse() {
+                if (loginRequest.readyState < 4) {
+                    const responseStatus = loginRequest.status;
+                    if (responseStatus === 200) {
+                        alert("Success");
+                    } else {
+                        alert("Login failed");
+                    }
+                }
+            }
         });
     </script>
 </head>
@@ -44,9 +73,11 @@
 <body>
     <h1>Log In to Lobstter</h1>
     <div class="container">
-        <input type="text" id="username" placeholder="Username" required="required" />
-        <input type="password" id="password" placeholder="Password" required="required" />
-        <button id="login" class="log">Log In</button>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required="required" />
+            <input type="password" id="password" placeholder="Password" required="required" />
+            <button id="login" class="log">Log In</button>
+        </form>
         <p>Don't have an Account? Sign Up <a href="signup.html">here</a></p>
     </div>
 </body>

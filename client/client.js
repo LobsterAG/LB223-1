@@ -7,5 +7,3 @@ if (location.host.includes('localhost')) {
     'script>'
   )
 }
-
-console.log('This is a Test')
