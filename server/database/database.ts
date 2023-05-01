@@ -41,7 +41,7 @@ export class Database {
 
   // used by the API class.
   // This method is responsible for executing SQL queries.
-  public executeSQL = async (query: string) => {
+  public executeSQL = async (query: string, values?: any[]) => {
     // Get a connection from the pool, execute the query, close the connection
     try {
       const conn = await this._pool.getConnection()
