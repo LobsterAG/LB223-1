@@ -14,29 +14,36 @@
         document.addEventListener("DOMContentLoaded", () => {
             const inputUsername = document.getElementById("username");
             const inputPassword = document.getElementById("password");
-            const buttonSignup = document.getElementById("signup");
-            buttonSignup.addEventListener("click", async () => {
-                const username = inputUsername.value;
-                const password = inputPassword.value;
+            const buttonLogin = document.getElementById("login");
+            const loginForm = document.getElementById("login-form");
+            let loginRequest;
+            loginForm.addEventListener("submit", onLoginFormSubmitted);
 
-                if (!username || !password) return
-                const response = await fetch("/login/token", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ username, password }),
-                })
-                const { token } = await response.json();
+            function onLoginFormSubmitted(event) {
+                event.preventDefault();
 
-                const secretResponse = await fetch("/hello/secure", {
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                const { message } = await secretResponse.json();
-                console.log('Secure Message,', message);
-            });
+                const loginData = {
+                    username: inputUsername.value,
+                    password: inputPassword.value
+                };
+
+                loginRequest = new XMLHttpRequest();
+                loginRequest.open("POST", "http://localhost:4200/login");
+                loginRequest.setRequestHeader("Content-Type", "application/json");
+                loginRequest.onreadystatechange = onLoginResponse;
+                loginRequest.send(JSON.stringify(loginData));
+            }
+
+            function onLoginResponse() {
+                if (loginRequest.readyState === 4) {
+                    const responseStatus = loginRequest.status;
+                    if (responseStatus === 200) {
+                        alert("Success");
+                    } else {
+                        alert("Login failed");
+                    }
+                }
+            }
         });
     </script>
 </head>
@@ -44,9 +51,11 @@
 <body>
     <h1>Sign Up to Lobstter</h1>
     <div class="container">
-        <input type="text" id="username" placeholder="Username" required="required" />
-        <input type="password" id="password" placeholder="Password" required="required" />
-        <button id="signup" type="submit" class="reg">Sign Up</button>
+        <form id="login-form">
+            <input type="text" id="username" placeholder="Username" required="required" />
+            <input type="password" id="password" placeholder="Password" required="required" />
+            <button id="signup" type="submit" class="reg">Sign Up</button>
+        </form>
         <p>Already have an Account? Log In <a href="login.html">here</a></p>
     </div>
 </body>

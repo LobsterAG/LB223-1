@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS tweets (
     tweet_id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     content VARCHAR(255) NOT NULL,
+    PRIMARY KEY (tweet_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 `
