@@ -13,7 +13,7 @@ body {
   border-top: 1px solid #e6ecf0;
 }
 
-.twitt {
+.messages {
   max-width: 400px;
   background: #fff;
   margin: 0 auto;
@@ -29,7 +29,7 @@ body {
   width: 30px;
 }
 
-.input-send {
+.message-input {
   padding: 10px 20px;
   border-radius: 5px;
   font-size: 14px;
