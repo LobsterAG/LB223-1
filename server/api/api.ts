@@ -16,95 +16,86 @@ export class API {
   // Constructor
   constructor(app: Express) {
     this.app = app
+    //Middleware
     this.app.use(express.json());
     this.app.use(cookieParser());
     this.app.use(bodyParser.json());
     this.app.use(bodyParser.urlencoded({ extended: true }));
+    //Endpoints
     this.app.post('/login', this.login.bind(this));
-    this.app.post('/register', this.register.bind(this));
+    this.app.post('/signup', this.signup.bind(this));
     this.app.get('/whoami', this.whoAmI.bind(this));
-    
   }
   // Methods
-  // Login
-  // used to log in an existing user
+  // Login: used to log in an existing user
   private async login(req: Request, res: Response) {
     const { username, password } = req.body;
-    console.log(username, password);
-
     try {
-      if (!username) {
-        res.status(400).send('Please put in your username.');
+      if (!username || !password) {
+        res.status(400).send('Please provide both a username and a password.');
         return;
       }
-      const result = await db.executeSQL('SELECT username, password FROM users WHERE username = ?', [username]);
-      if (result.length > 0) {
-        const user = result[0];
-        const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-        if (user.password === hashedPassword) {
-          const token = this.generateAccessToken({ username });
-          res.cookie('jwt', token, { httpOnly: true });
-          res.status(200).send('Login successful.');
-        } else {
-          res.status(400).send('Invalid username or password.');
-        }
-      } else {
-        res.status(400).send('Invalid username or password.');
+      // Check if the username exists in the database
+      const result = await db.executeSQL('SELECT * FROM users WHERE username = ?', [username]);
+      if (result.length === 0) {
+        res.status(400).send('The username or password is incorrect.');
+        return;
       }
+      // Check if the password is correct
+      const user = result[0];
+      const hashedPassword = crypto.scryptSync(password, user.salt, 64).toString('hex');
+      if (user.password !== hashedPassword) {
+        res.status(400).send('The username or password is incorrect.');
+        return;
+      }
+      // Generate an access token
+      const accessToken = jwt.sign({ username: user.username }, TOKEN_SECRET);
+      res.cookie('accessToken', accessToken, { httpOnly: true });
+      res.status(200).send('Login successful.');
     } catch (error) {
-      res.status(500).send('Failed to login.');
+      console.error(error);
+      res.status(500).send('Failed to log in.');
     }
   }
-  // Register
-  // used to register a new user
-  private async register(req: Request, res: Response) {
-    const { username, password, role_id } = req.body;
-    const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-    const existingUser = await db.executeSQL('SELECT username FROM users WHERE username = ?', [username]);
-    if (existingUser.length > 0) {
-      return res.status(400).send("This username already exists. Please choose a different username.");
-    }
-    const userRole = role_id || 1;
+  // SignUp: used to register a new user
+  private async signup(req: Request, res: Response) {
+    const { username, password } = req.body;
     try {
-      await db.executeSQL(
-        `INSERT INTO users (username, password, role_id) VALUES (?, ?, ?)`,
-        [username, hashedPassword, userRole]
-      );
-      res.send(`User ${username} registered successfully.`);
+      if (!username || !password) {
+        res.status(400).send('Please provide both a username and a password.');
+        return;
+      }
+      // Check if the username already exists in the database
+      const result = await db.executeSQL('SELECT username FROM users WHERE username = ?', [username]);
+      if (result.length > 0) {
+        res.status(400).send('This username already exists. Please choose a different one.');
+        return;
+      }
+      // Hash the password
+      const salt = crypto.randomBytes(16).toString('hex');
+      const hashedPassword = crypto.scryptSync(password, salt, 64).toString('hex');
+      // Store the user in the database
+      await db.executeSQL('INSERT INTO users (username, password, salt) VALUES (?, ?, ?)', [username, hashedPassword, salt]);
+      res.status(200).send('Sign-up successful.');
     } catch (error) {
-      console.log(error);
-      res.status(500).send('Failed to register user.');
+      console.error(error);
+      res.status(500).send('Failed to sign up.');
     }
   }
-  // Generate Access Token
-  // used to generate a token for the user that is currently logged in
-  private generateAccessToken(username: { username: string }) {
-    return jwt.sign(username, TOKEN_SECRET, { expiresIn: '1800s' });
-  }
-  // Authentication
-  // used to check if the user is logged in
-  public authentication(req: Request, res: Response) {
-    const token = req.cookies.jwt;
-    if (!token) {
-      res.status(401).send('Unauthorized');
-      return;
-    }
-    return true;
-  }
-  // Who Am I
-  // used to get the username of the user that is currently logged in
-  public whoAmI(req: Request, res: Response) {
-    const token = req.cookies.jwt;
-    if (!this.authentication(req, res)) {
-      return;
-    }
+  // Who Am I: used to get the username of the user that is currently logged in
+  private async whoAmI(req: Request, res: Response) {
     try {
-      const decodedToken = jwt.verify(token, TOKEN_SECRET) as { username: string };
-      const username = decodedToken.username;
-      res.status(200).send(username);
+      const accessToken = req.cookies['accessToken'];
+      if (!accessToken) {
+        res.status(400).send('No access token provided.');
+        return;
+      }
+      const decoded = jwt.verify(accessToken, TOKEN_SECRET) as { username: string };
+      const username = decoded.username;
+      res.status(200).json({ username });
     } catch (error) {
-      res.status(401).send('Unauthorized');
+      console.error(error);
+      res.status(500).send('Failed to get username.');
     }
   }
-
 }

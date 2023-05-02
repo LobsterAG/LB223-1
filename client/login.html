@@ -16,34 +16,42 @@
             const inputPassword = document.getElementById("password");
             const buttonLogin = document.getElementById("login");
             const loginForm = document.getElementById("login-form");
-            let loginRequest;
-            loginForm.addEventListener("submit", onLoginFormSubmitted);
-
+            //prevents the default action of submitting the form
             function onLoginFormSubmitted(event) {
                 event.preventDefault();
-
-                const loginData = {
+            }
+            loginForm.addEventListener("submit", onLoginFormSubmitted);
+            //attaches an event listener to the "login" button
+            buttonLogin.addEventListener("click", () => {
+                //creates a user object with the username and password
+                const user = {
                     username: inputUsername.value,
                     password: inputPassword.value
                 };
-
-                loginRequest = new XMLHttpRequest();
-                loginRequest.open("POST", "http://localhost:4200/login");
-                loginRequest.setRequestHeader("Content-Type", "application/json");
-                loginRequest.onreadystatechange = onLoginResponse;
-                loginRequest.send(JSON.stringify(loginData));
-            }
-
-            function onLoginResponse() {
-                if (loginRequest.readyState === 4) {
-                    const responseStatus = loginRequest.status;
-                    if (responseStatus === 200) {
-                        alert("Success");
-                    } else {
-                        alert("Login failed");
-                    }
-                }
-            }
+                //sends a POST request to the server with the user object in the body
+                fetch("/login", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(user)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        //if the server returns an error, display the error message
+                        if (data.error) {
+                            alert(data.error);
+                        }
+                        //if the server returns a success message, redirect the user to the home page
+                        else if (data.message) {
+                            alert(data.message);
+                            window.location.href = "/home.html";
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+            });
         });
     </script>
 </head>

@@ -1,6 +1,6 @@
 import mariadb from 'mariadb'
 import { Pool } from 'mariadb'
-import { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE } from './schema'
+import { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, INSERT } from './schema'
 
 export class Database {
   // It is only used internally by the constructor.
@@ -33,6 +33,7 @@ export class Database {
       await this._pool.query(LIKES_TABLE)
       await this._pool.query(DISLIKES_TABLE)
       await this._pool.query(COMMENT_TABLE)
+      await this._pool.query(INSERT)
       console.log('DB schema initialized!')
     } catch (err) {
       console.log(err)

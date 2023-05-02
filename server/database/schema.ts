@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     user_id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
-    role_id INT,
+    role_id INT NOT NULL,
     PRIMARY KEY (user_id),
     FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -65,4 +65,12 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 `
 
-export { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE }
+const INSERT = `
+INSERT IGNORE INTO roles (role_id, role_name) VALUES
+(1, 'User'),
+(2, 'Moderator');
+(3, 'Admin');
+`;
+
+export { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, INSERT }
+
