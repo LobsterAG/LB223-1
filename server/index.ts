@@ -3,6 +3,13 @@ import { API } from './api'
 import http from 'http'
 import { resolve, dirname } from 'path'
 import { Database } from './database'
+import { Authentication } from './authentication'
+import * as bodyParser from 'body-parser'
+import * as dotenv from 'dotenv'
+
+dotenv.config()
+
+const TOKEN_SECRET = process.env.TOKEN_SECRET || 'supersecret123'
 
 class Backend {
   // Properties
@@ -23,15 +30,23 @@ class Backend {
   // Constructor
   constructor() {
     this._app = express()
+    // support parsing of application/json type post data
+    this._app.use(bodyParser.json())
+    //support parsing of application/x-www-form-urlencoded post data
+    this._app.use(bodyParser.urlencoded({ extended: true }))
     this._database = new Database()
-    this._api = new API(this._app)
+    const auth = new Authentication(TOKEN_SECRET, this._app)
+    this._api = new API(this._app, auth)
     this._env = process.env.NODE_ENV || 'development'
 
     this.setupStaticFiles()
     this.setupRoutes()
     this.startServer()
   }
+
   // Methods
+  // used for serving static files
+  // Source: https://stackoverflow.com/questions/25463423/serving-static-files-in-express-js
   private setupStaticFiles(): void {
     this._app.use(express.static('client'))
   }
@@ -41,6 +56,7 @@ class Backend {
       res.sendFile(__dirname + '/client/index.html')
     })
   }
+  // used for starting the server
   private startServer(): void {
     if (this._env === 'production') {
       http.createServer(this.app).listen(3000, () => {
@@ -49,5 +65,5 @@ class Backend {
     }
   }
 }
-const backend = new Backend()
+export const backend = new Backend()
 export const viteNodeApp = backend.app

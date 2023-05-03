@@ -7,7 +7,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css" />
     <script src="client.js"></script>
-    <script src="login.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $("#login-form").submit(function (e) {
+            e.preventDefault();
+            var username = $("#login-username").val();
+            var password = $("#login-password").val();
+            $.ajax({
+                type: "POST",
+                url: "http://localhost:3000/login",
+                data: {
+                    username: username,
+                    password: password
+                },
+                success: function (data) {
+                    if (data == "success") {
+                        alert("Log In Successful");
+                        window.location.href = "http://localhost:3000/home";
+                    } else {
+                        alert("Log In Failed");
+                    }
+                }
+            });
+        });
+    </script>
     <title>Login</title>
 </head>
 
@@ -15,8 +38,8 @@
     <h1>Log In to Lobstter</h1>
     <div class="container">
         <form id="login-form">
-            <input type="text" id="username" placeholder="Username" required="required" />
-            <input type="password" id="password" placeholder="Password" required="required" />
+            <input type="text" id="login-username" placeholder="Username" required="required" />
+            <input type="password" id="login-password" placeholder="Password" required="required" />
             <button id="login" class="log">Log In</button>
         </form>
         <p>Don't have an Account? Sign Up <a href="signup.html">here</a></p>

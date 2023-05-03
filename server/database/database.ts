@@ -3,10 +3,7 @@ import { Pool } from 'mariadb'
 import { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, INSERT } from './schema'
 
 export class Database {
-  // It is only used internally by the constructor.
-  // This property is responsible for creating the database connection pool.
-  // The pool is a collection of connections to the database.
-  // The pool is used to execute queries.
+  // Properties
   private _pool: Pool
   // Constructor
   constructor() {
@@ -19,39 +16,56 @@ export class Database {
     })
     this.initializeDBSchema()
   }
-
-  // private because no expose
-  // It is only used internally by the constructor.
-  // This method is responsible for creating the database schema.
+  // Methods
   private initializeDBSchema = async () => {
     console.log('Initializing DB schema...')
-    // Initialize the database schema
+    const conn = await this.startTransaction()
+    await this.executeSQL(USER_TABLE, conn)
+    await this.executeSQL(TWEET_TABLE, conn)
+    await this.executeSQL(LIKES_TABLE, conn)
+    await this.executeSQL(DISLIKES_TABLE, conn)
+    await this.executeSQL(COMMENT_TABLE, conn)
+    await this.executeSQL(ROLE_TABLE, conn)
+    await this.executeSQL(INSERT, conn)
+    this.commitTransaction(conn)
+  }
+
+  public startTransaction = async (): Promise<mariadb.PoolConnection | null> => {
     try {
-      await this._pool.query(USER_TABLE)
-      await this._pool.query(ROLE_TABLE)
-      await this._pool.query(TWEET_TABLE)
-      await this._pool.query(LIKES_TABLE)
-      await this._pool.query(DISLIKES_TABLE)
-      await this._pool.query(COMMENT_TABLE)
-      await this._pool.query(INSERT)
-      console.log('DB schema initialized!')
+      const conn = await this._pool.getConnection()
+      await conn.beginTransaction()
+      return conn
+    } catch (err) {
+      console.log(err)
+      return null
+    }
+  }
+  public commitTransaction = async (conn: any) => {
+    try {
+      await conn.commit()
+      conn.end()
     } catch (err) {
       console.log(err)
     }
   }
-
-  // used by the API class.
-  // This method is responsible for executing SQL queries.
-  public executeSQL = async (query: string, values?: any[]) => {
-    // Get a connection from the pool, execute the query, close the connection
+  public rollbackTransaction = async (conn: any) => {
     try {
-      const conn = await this._pool.getConnection()
+      await conn.rollback()
+      conn.end()
+    } catch (err) {
+      console.log(err)
+    }
+  }
+  public executeSQL = async (query: string, conn: any): Promise<Array<any>> => {
+    try {
+      if (!conn) return []
       const res = await conn.query(query)
+      console.log(query)
       conn.end()
       return res
     } catch (err) {
-      // If there is an error, log it and return undefined
       console.log(err)
+      return []
     }
   }
 }

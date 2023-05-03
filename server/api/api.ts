@@ -1,99 +1,38 @@
-import jwt from 'jsonwebtoken';
-import dotenv from 'dotenv';
-import express, { Request, Response, Express } from 'express'
-import crypto from 'crypto';
-import { Database } from '../database'
-import bodyParser from 'body-parser';
-
-const db = new Database();
-dotenv.config();
-const TOKEN_SECRET = process.env.TOKEN_SECRET as string;
+// Source: https://github.com/SwitzerChees/simple-typescript-template/tree/auth
+import { Request, Response, Express } from 'express'
+import { Authentication } from '../authentication'
+import { backend } from '../index'
 
 export class API {
   // Properties
   app: Express
+  auth: Authentication
   // Constructor
-  constructor(app: Express) {
+  constructor(app: Express, auth: Authentication) {
     this.app = app
-    //Middleware
-    this.app.use(express.json());
-    this.app.use(bodyParser.json());
-    this.app.use(bodyParser.urlencoded({ extended: true }));
-    //Endpoints
-    this.app.post('/login', this.login);
-    this.app.post('/signup', this.signup);
-    this.app.get('/whoami', this.whoAmI);
+    this.auth = auth
+    this.app.post('/signup', this.signup)
+    this.app.post('/login', this.auth.createToken.bind(this.auth))
+    this.app.get('/hello', this.sayHello)
+    this.app.get('/hello/secure', this.auth.authenticate.bind(this.auth), this.sayHelloSecure)
   }
   // Methods
-  // Login: used to log in an existing user
-  private async login(req: Request, res: Response) {
-    const { username, password } = req.body;
-    try {
-      if (!username || !password) {
-        res.status(400).send('Please provide both a username and a password.');
-        return;
-      }
-      // Check if the username exists in the database
-      const result = await db.executeSQL('SELECT username, password FROM users WHERE username = ?', [username]);
-      if (result.length === 0) {
-        res.status(400).send('This username does not exist.');
-        return;
-      }
-      // Hash the password
-      const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-      // Check if the password is correct
-      if (hashedPassword !== result[0].password) {
-        res.status(400).send('The password is incorrect.');
-        return;
-      }
-      // Create an access token
-      const accessToken = jwt.sign({ username }, TOKEN_SECRET);
-      // Send the access token to the client inside a cookie
-      res.cookie('accessToken', accessToken, { httpOnly: true });
-      res.status(200).send('Login successful.');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Failed to log in.');
-    }
+  private sayHello(request: Request, res: Response) {
+    res.send('Hello There!')
   }
-  // SignUp: used to register a new user
-  private async signup(req: Request, res: Response) {
-    const { username, password } = req.body;
-    try {
-      if (!username || !password) {
-        res.status(400).send('Please provide both a username and a password.');
-        return;
-      }
-      // Check if the username already exists in the database
-      const result = await db.executeSQL('SELECT username FROM users WHERE username = ?', [username]);
-      if (result.length > 0) {
-        res.status(400).send('This username already exists. Please choose a different one.');
-        return;
-      }
-      // Hash the password
-      const hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-      // Store the user in the database
-      await db.executeSQL('INSERT INTO users (username, password, role_id) VALUES (?, ?, 1)', [username, hashedPassword, 1]);
-      res.status(200).send('Sign-up successful.');
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Failed to sign up.');
-    }
+
+  private sayHelloSecure(request: Request, res: Response) {
+    res.status(200).json({ message: 'Hello There from Secure endpoint!' })
   }
-  // Who Am I: used to get the username of the user that is currently logged in
-  private async whoAmI(req: Request, res: Response) {
-    try {
-      const accessToken = req.cookies.accessToken;
-      if (!accessToken) {
-        res.status(401).send('You are not logged in.');
-        return;
-      }
-      const payload = jwt.verify(accessToken, TOKEN_SECRET) as { username: string };
-      const username = payload.username;
-      res.status(200).send(`You are logged in as ${username}.`);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Failed to check if you are logged in.');
-    }
+
+  private async signup(request: Request, res: Response) {
+    const { username, password } = request.body
+    const conn = await backend.database.startTransaction()
+    const users = await backend.database.executeSQL(`SELECT * FROM users WHERE username = '${username}'`, conn)
+    if (users.length > 0) return res.status(401).json({ message: 'Username already exists' })
+    const hashedPassword = await Authentication.hashPassword(password)
+    const response = await backend.database.executeSQL('INSERT INTO users(username, password, role_name) VALUES ("' + username + '" , "' + hashedPassword + '" , "user")', conn)
+    console.log("registration: " + response)
+    await backend.database.commitTransaction(conn)
   }
 }
