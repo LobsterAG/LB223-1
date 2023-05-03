@@ -70,6 +70,10 @@ INSERT IGNORE INTO roles (role_id, role_name) VALUES
 (1, 'User'),
 (2, 'Moderator');
 (3, 'Admin');
+INSERT IGNORE INTO users (user_id, username, password, role_id) VALUES
+(1, 'user1', '0b14d501a594442a01c6859541bcb3e8164d183d32937b851835442f69d5c94e', 1),
+(2, 'moderator', 'cfde2ca5188afb7bdd0691c7bef887baba78b709aadde8e8c535329d5751e6fe', 2),
+(3, 'admin', '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918', 3);
 `;
 
 export { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, INSERT }
