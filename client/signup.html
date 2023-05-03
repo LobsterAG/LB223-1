@@ -15,7 +15,7 @@
             var password = $("#signup-password").val();
             $.ajax({
                 type: "POST",
-                url: "http://localhost:3000/signup",
+                url: "http://localhost:4200/signup",
                 data: {
                     username: username,
                     password: password
@@ -23,7 +23,7 @@
                 success: function (data) {
                     if (data == "success") {
                         alert("Sign Up Successful");
-                        window.location.href = "http://localhost:3000/login";
+                        window.location.href = "http://localhost:4200/login";
                     } else {
                         alert("Sign Up Failed");
                     }
