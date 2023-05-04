@@ -83,7 +83,7 @@ export class Authentication {
         // hash the password
         const hashedPassword = await Authentication.hashPassword(password)
         // insert the user into the database
-        await backend.database.executeSQL(`INSERT INTO users (username, password, role_id) VALUES ('${username}', '${hashedPassword}', 1)`, conn)
+        await backend.database.executeSQL(`INSERT INTO users (username, password, role_id, ban) VALUES ('${username}', '${hashedPassword}', 1, 0)`, conn)
         // commit the transaction
         await backend.database.commitTransaction(conn)
         // send the response

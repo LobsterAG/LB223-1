@@ -9,13 +9,13 @@ CREATE TABLE IF NOT EXISTS roles (
 );
 `
 
-
 const USER_TABLE = `
 CREATE TABLE IF NOT EXISTS users (
     user_id INT NOT NULL AUTO_INCREMENT,
     username VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
+    ban BOOLEAN NOT NULL,
     PRIMARY KEY (user_id),
     FOREIGN KEY (role_id) REFERENCES roles(role_id) ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -65,12 +65,66 @@ CREATE TABLE IF NOT EXISTS comments (
 );
 `
 
-const INSERT = `
-INSERT IGNORE INTO roles (role_id, role_name) VALUES
-(1, 'User'),
-(2, 'Moderator');
-(3, 'Admin');
-`;
+const INSERT_ROLE_USER = `
+INSERT INTO roles (role_name) VALUES ("User");
+`
 
-export { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, INSERT }
+const INSERT_ROLE_MODERATOR = `
+INSERT INTO roles (role_name) VALUES ("Moderator");
+`
 
+const INSERT_ROLE_ADMIN = `
+INSERT INTO roles (role_name) VALUES ("Admin");
+`
+
+const checkIfRoleExistsAndInsertDefaults = async (conn: any) => {
+    try {
+        const selectQuery = `SELECT * FROM roles`
+        const roles = await conn.execute(selectQuery)
+        if (roles.length === 0) {
+            try {
+                await conn.execute(INSERT_ROLE_USER)
+                await conn.execute(INSERT_ROLE_MODERATOR)
+                await conn.execute(INSERT_ROLE_ADMIN)
+            } catch (err) {
+                console.log(err)
+            }
+        }
+        else {
+            console.log("Roles already exists");
+        }
+    } catch (error) {
+        console.error(`Error checking if roles exist and inserting defaults: ${error}`);
+    }
+}
+
+const INSERT_USER = `
+INSERT INTO users (username, password, role_id, ban) VALUES ("admin", "", 3, false);
+`
+
+const INSERT_MODERATOR = `
+INSERT INTO users (username, password, role_id, ban) VALUES ("moderator", "", 2, false);
+`
+
+const INSERT_ADMIN = `
+INSERT INTO users (username, password, role_id, ban) VALUES ("user", "", 1, false);
+`
+
+const checkIfUserExistsAndInsertDefaults = async (conn: any) => {
+    try {
+        const selectQuery = `SELECT * FROM users`
+        const users = await conn.execute(selectQuery)
+        if (users.length === 0) {
+            await conn.execute(INSERT_USER);
+            await conn.execute(INSERT_MODERATOR);
+            await conn.execute(INSERT_ADMIN);
+        }
+        else {
+            console.log("Users already exists");
+        }
+    } catch (error) {
+        console.error(`Error checking if roles exist and inserting defaults: ${error}`);
+    }
+}
+
+export { ROLE_TABLE, USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, checkIfRoleExistsAndInsertDefaults, checkIfUserExistsAndInsertDefaults }
