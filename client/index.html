@@ -1,14 +1,82 @@
 <!DOCTYPE html>
 <html lang="de">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css" />
-    <script src="client.js"></script>
-    <title>Typescript Starter</title>
-  </head>
-  <body>
-    <h1>Simple Typescript Starter</h1>
-  </body>
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/style.css" />
+  <title>Lobstter</title>
+</head>
+
+<body>
+  <h1>Welcome to Lobstter!</h1>
+  <div class="container">
+    <img src="img/lobster.png" alt="Lobster" width="500">
+    <p>Sign in to Lobstter or join Lobstter today</p>
+    <div>
+      <button onclick="window.location.href = 'login.html';" class="log">Login</button>
+      <button onclick="window.location.href = 'signup.html';" class="reg">Sign up</button>
+    </div>
+  </div>
+</body>
+
 </html>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: #caf0f8;
+  }
+
+  h1 {
+    font-size: 50px;
+    color: #03045e;
+    text-align: center;
+    padding: 10px;
+  }
+
+  .container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 50px;
+  }
+
+  p {
+    font-size: 20px;
+    color: #03045e;
+    margin: 10px;
+    text-align: center;
+  }
+
+  p a {
+    color: #03045e;
+    text-decoration: none;
+    font-size: 20px;
+    transition: 0.5s;
+  }
+
+  button {
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-size: 20px;
+    cursor: pointer;
+    margin: 10px;
+    transition: 0.5s;
+  }
+
+  .reg {
+    background-color: #caf0f8;
+    color: #03045e;
+    border: 2px solid #03045e;
+  }
+
+  .log {
+    background-color: #03045e;
+    color: #caf0f8;
+    border: 2px solid #03045e;
+  }
+</style>
