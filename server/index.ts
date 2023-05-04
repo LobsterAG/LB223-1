@@ -75,6 +75,11 @@ class Backend {
     }
   }
 }
+
+
+const backend = new Backend()
+
 // export the backend class
 export const backend = new Backend()
+
 export const viteNodeApp = backend.app
