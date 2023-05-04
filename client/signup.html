@@ -8,29 +8,7 @@
     <link rel="stylesheet" href="/style.css" />
     <script src="client.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $("#signup-form").submit(function (e) {
-            e.preventDefault();
-            var username = $("#signup-username").val();
-            var password = $("#signup-password").val();
-            $.ajax({
-                type: "POST",
-                url: "http://localhost:4200/signup",
-                data: {
-                    username: username,
-                    password: password
-                },
-                success: function (data) {
-                    if (data == "success") {
-                        alert("Sign Up Successful");
-                        window.location.href = "http://localhost:4200/login";
-                    } else {
-                        alert("Sign Up Failed");
-                    }
-                }
-            });
-        });
-    </script>
+    <script src="signup.js"></script>
     <title>Sign Up</title>
 </head>
 

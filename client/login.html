@@ -7,30 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css" />
     <script src="client.js"></script>
+    <!-- implementing ajax -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script>
-        $("#login-form").submit(function (e) {
-            e.preventDefault();
-            var username = $("#login-username").val();
-            var password = $("#login-password").val();
-            $.ajax({
-                type: "POST",
-                url: "http://localhost:4200/login",
-                data: {
-                    username: username,
-                    password: password
-                },
-                success: function (data) {
-                    if (data == "success") {
-                        alert("Log In Successful");
-                        window.location.href = "http://localhost:4200/home";
-                    } else {
-                        alert("Log In Failed");
-                    }
-                }
-            });
-        });
-    </script>
+    <script src="login.js"></script>
     <title>Login</title>
 </head>
 
