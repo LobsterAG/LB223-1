@@ -6,9 +6,4 @@ if (location.host.includes('localhost')) {
     ':35729/livereload.js?snipver=1"></' +
     'script>'
   )
-
 }
-console.log('This is a Test')
-=======
-}
-
