@@ -1,29 +1,64 @@
-const socket = new WebSocket(generateBackendUrl());
-socket.addEventListener('open', () => {
-  console.log('WebSocket connected!');
-  socket.send(JSON.stringify({ type: 'newUser', user: myUser }));
-});
-socket.addEventListener('message', (event) => {
-    const message = JSON.parse(event.data);
-    //Seleckt one of Code Blocks
-    switch (message.type) {
-        case 'message':
-            const messageElement = generateMessage(message, myUser);
-            //Add to messages node messageElement
-            document.getElementById('messages').appendChild(messageElement);
-            //Make css to see the mensage
-            setTimeout(() => {
-                messageElement.classList.add('opacity-100');
-            }, 100); //ms
-            break;
-    }
+//Html elements
+const sendButton = document.getElementById('sendButton');
+const twittContainer = document.getElementById('twittContainer');
 
-    document.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter') {
-            console.log("ok");
-            const message = document.getElementById('messageInput').value;
-            socket.send(JSON.stringify({ type: 'message', message, user: myUser }));
-            document.getElementById('messageInput').value = '';
+function sendTwitt() {
+    console.log('work:)');
+    //Create a new HTML element in the memory and ad CSS
+    const twittContainer = document.createElement('div');
+    twittContainer.classList.add('twitt-container');
+
+    const twitt = document.createElement('p');
+    twitt.classList.add('twitts');
+    twitt.textContent = twittInput.value;
+
+    const iconsContainer = document.createElement('div');
+    iconsContainer.classList.add('icons-container');
+
+    const likeIcon = document.createElement('img');
+    likeIcon.classList.add('icon');
+    likeIcon.src = 'img/like.svg';
+    iconsContainer.appendChild(likeIcon);
+
+    const commentIcon = document.createElement('img');
+    commentIcon.classList.add('icon');
+    commentIcon.src = 'img/coment.svg';
+    iconsContainer.appendChild(commentIcon);
+
+    const editIcon = document.createElement('img');
+    editIcon.classList.add('icon');
+    editIcon.src = 'img/edit.svg';
+    iconsContainer.appendChild(editIcon);
+
+    const deleteIcon = document.createElement('img');
+    deleteIcon.classList.add('icon');
+    deleteIcon.src = 'img/delete.svg';
+    iconsContainer.appendChild(deleteIcon);
+
+    twittContainer.appendChild(twitt);
+    twittContainer.appendChild(iconsContainer);
+    twitts.appendChild(twittContainer);
+
+    twittInput.value = '';
+
+    likeIcon.setAttribute("data-liked", "false");
+
+    likeIcon.addEventListener("click", function() {
+        if (likeIcon.getAttribute("data-liked") === "false") {
+          likeIcon.setAttribute("data-liked", "true");
+          likeIcon.src = "img/like.png";
+        } else {
+          likeIcon.setAttribute("data-liked", "false");
+          likeIcon.src = "img/like.svg";
         }
-    });
+      });      
+}
+
+sendButton.addEventListener('click', sendTwitt);
+
+twittInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendTwitt();
+    }
 });
