@@ -1,7 +1,8 @@
 import { Request, Response, Express } from 'express'
 import * as bcrypt from 'bcrypt'
-import { sign, verify } from 'jsonwebtoken'
+import pkg from 'jsonwebtoken'
 import { backend } from '../index'
+const { sign, verify } = pkg
 
 // define the token interface
 interface Token {

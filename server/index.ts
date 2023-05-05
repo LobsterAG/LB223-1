@@ -4,7 +4,6 @@ import http from 'http'
 import { resolve, dirname } from 'path'
 import { Database } from './database'
 import { Authentication } from './authentication'
-import * as bodyParser from 'body-parser'
 import * as dotenv from 'dotenv'
 
 // load the environment variables from the .env file
@@ -38,9 +37,9 @@ class Backend {
   constructor() {
     this._app = express()
     // support parsing of application/json type post data
-    this._app.use(bodyParser.json())
+    this._app.use(express.json())
     //support parsing of application/x-www-form-urlencoded post data
-    this._app.use(bodyParser.urlencoded({ extended: true }))
+    this._app.use(express.urlencoded({ extended: true }))
     this._database = new Database()
     const auth = new Authentication(TOKEN_SECRET, this._app)
     this._api = new API(this._app, auth)
