@@ -36,21 +36,28 @@ export class Authentication {
         // start a transaction
         const conn = await backend.database.startTransaction()
         // get users from database and check if the user exists
-        const users = await backend.database.executeSQL(`SELECT * FROM users WHERE username = '${username}'`, conn)
-        // check again if the sql query returned a user
-        const user = users.find((users) => users.username === username)
-        // if the user does not exist, return an error
-        if (!user) return res.status(401).json({ message: 'Invalid username' })
-        // check if the password is valid
-        const validPassword = await bcrypt.compare(password, user.password)
-        // if the password is not valid, return an error
-        if (!validPassword) res.status(401).json({ message: 'Invalid username or password' })
-        // commit the transaction
-        await backend.database.commitTransaction(conn)
-        const token = sign({ userId: user.id }, this.secretKey, { expiresIn: '1h' })
-        // set the token in a cookie and send the response 
-        res.cookie('token', token, { httpOnly: true, maxAge: 3600000 });
-        res.json({ message: 'Logged in successfully' });
+        try {
+            // get users from database and check if the user exists
+            const users = await backend.database.executeSQL(`SELECT * FROM users WHERE username = '${username}'`, conn)
+            // check again if the sql query returned a user
+            const user = users.find((users) => users.username === username)
+            // if the user does not exist, return an error
+            if (!user) return res.status(401).json({ message: 'Invalid username' })
+            // check if the password is valid
+            const validPassword = await bcrypt.compare(password, user.password)
+            // if the password is not valid, return an error
+            if (!validPassword) return res.status(401).json({ message: 'Invalid username or password' })
+            const token = sign({ userId: user.id }, this.secretKey, { expiresIn: '1h' })
+            // set the token in a cookie and send the response 
+            res.cookie('authorization', token, { httpOnly: true, maxAge: 3600000 });
+            // commit the transaction
+            await backend.database.commitTransaction(conn)
+            res.json({ message: 'Logged in successfully' });
+        } catch (err) {
+            // rollback the transaction if there was an error
+            await backend.database.rollbackTransaction(conn)
+            throw err
+        }
     }
     // hash method
     // used for hashing the password
@@ -75,45 +82,50 @@ export class Authentication {
         // start a transaction
         const conn = await backend.database.startTransaction()
         // get users from database and check if the user exists
-        const users = await backend.database.executeSQL(`SELECT * FROM users WHERE username = '${username}'`, conn)
-        // check again if the sql query returned a user
-        const user = users.find((users) => users.username === username)
-        // if the user exists, return an error
-        if (user) return res.status(401).json({ message: 'User already exists' })
-        // hash the password
-        const hashedPassword = await Authentication.hashPassword(password)
-        // insert the user into the database
-        await backend.database.executeSQL(`INSERT INTO users (username, password, role_id, ban) VALUES ('${username}', '${hashedPassword}', 1, 0)`, conn)
-        // commit the transaction
-        await backend.database.commitTransaction(conn)
-        // send the response
-        res.json({ message: 'User created successfully' })
+        try {
+            const users = await backend.database.executeSQL(`SELECT * FROM users WHERE username = '${username}'`, conn)
+            // check again if the sql query returned a user
+            const user = users.find((users) => users.username === username)
+            // if the user exists, return an error
+            if (user) return res.status(401).json({ message: 'User already exists' })
+            // hash the password
+            const hashedPassword = await Authentication.hashPassword(password)
+            // insert the user into the database
+            await backend.database.executeSQL(`INSERT INTO users (username, password, role_id, ban) VALUES ('${username}', '${hashedPassword}', 1, 0)`, conn)
+            // commit the transaction
+            await backend.database.commitTransaction(conn)
+            // send the response
+            res.json({ message: 'User created successfully' })
+        } catch (err) {
+            // rollback the transaction if there was an error
+            await backend.database.rollbackTransaction(conn)
+            throw err
+        }
     }
     // authenticate method
     // used for authenticating the user
-    public authenticate(request: Request, res: Response, next: any) {
+    public async authenticate(request: Request, res: Response, next: any) {
         // check if the request has an authorization header
-        const token = request.headers.authorization
+        const token = request.cookies.authorization
         // if the request does not have an authorization header, return an error
         if (!token) {
             // return an error
-            return res.status(401).json({ message: 'Missing Authorization header' })
+            return res.status(401).json({ message: 'Missing Authorization' })
         }
         // if the request has an authorization header, verify the token
         try {
             // verify the token
             const decoded = verify(token, this.secretKey) as Token
-            // if the token is not a string, return an error
-            if (!isString(decoded)) {
-                request.token = decoded
-            }
-            // if the token is not valid, return an error
+            // set the decoded token in the request object
+            request.token = decoded
+            // continue to the next middleware
             next()
         } catch (err) {
             res.status(401).json({ message: 'Invalid token' })
         }
     }
+
 }
 // isString method
 // used for type checking the token
-const isString = (value: any): value is string => typeof value === 'string'
+const isString = (value: any): value is string => typeof value === 'string';
