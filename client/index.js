@@ -1,0 +1,1 @@
+console.log("Welcome to Lobstter, the interactive twitter clone!");

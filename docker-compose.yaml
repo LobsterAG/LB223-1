@@ -27,5 +27,15 @@ services:
     ports:
       - 9200:80
 
+  lobstter:
+     image: darkdesignx/lb223-01:v1
+     ports:
+       - 4200:4200
+     restart: always
+     depends_on:
+       - mariadb
+     environment:
+      - DB_HOST=mariadb
+
 volumes:
   m223_project_mariadb:
