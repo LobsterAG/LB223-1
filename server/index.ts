@@ -19,6 +19,7 @@ class Backend {
   private _app: Express
   private _api: API
   private _database: Database
+  private _auth: Authentication
   private _env: string
   // Getters
   public get app(): Express {
@@ -29,6 +30,9 @@ class Backend {
   }
   public get database(): Database {
     return this._database
+  }
+  public get auth(): Authentication {
+    return this._auth
   }
   // Constructor
   constructor() {

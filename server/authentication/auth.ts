@@ -43,11 +43,14 @@ export class Authentication {
             const user = users.find((users) => users.username === username)
             // if the user does not exist, return an error
             if (!user) return res.status(401).json({ message: 'Invalid username' })
+            // check if the user is banned
+            if (user.ban === 1) return res.status(401).json({ message: 'You are banned' })
             // check if the password is valid
             const validPassword = await bcrypt.compare(password, user.password)
             // if the password is not valid, return an error
             if (!validPassword) return res.status(401).json({ message: 'Invalid username or password' })
-            const token = sign({ userId: user.id }, this.secretKey, { expiresIn: '1h' })
+            // create a token
+            const token = sign({ username: username }, this.secretKey, { expiresIn: '1h' })
             // set the token in a cookie and send the response 
             res.cookie('authorization', token, { httpOnly: true, maxAge: 3600000 });
             // commit the transaction
@@ -104,27 +107,26 @@ export class Authentication {
     }
     // authenticate method
     // used for authenticating the user
-    public async authenticate(request: Request, res: Response, next: any) {
-        // check if the request has an authorization header
-        const token = request.cookies.authorization
-        // if the request does not have an authorization header, return an error
-        if (!token) {
-            // return an error
-            return res.status(401).json({ message: 'Missing Authorization' })
+    public authenticate(req: Request, res: Response, next: any) {
+        // get the authorization header
+        const authHeader = req.headers.authorization
+        if (!authHeader) {
+            return res.status(401).json({ message: 'Missing Authorization header' })
         }
-        // if the request has an authorization header, verify the token
+        const token = authHeader.split(' ')[1]
+        if (!token) {
+            return res.status(401).json({ message: 'Invalid token format' })
+        }
         try {
-            // verify the token
             const decoded = verify(token, this.secretKey) as Token
-            // set the decoded token in the request object
-            request.token = decoded
-            // continue to the next middleware
+            if (!isString(decoded)) {
+                req.token = decoded
+            }
             next()
         } catch (err) {
             res.status(401).json({ message: 'Invalid token' })
         }
     }
-
 }
 // isString method
 // used for type checking the token

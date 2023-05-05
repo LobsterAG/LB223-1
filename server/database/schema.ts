@@ -43,16 +43,6 @@ CREATE TABLE IF NOT EXISTS likes (
 );
 `
 
-const DISLIKES_TABLE = `
-CREATE TABLE IF NOT EXISTS dislikes (
-    dislike_id INT NOT NULL AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    tweet_id INT NOT NULL,
-    PRIMARY KEY (dislike_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (tweet_id) REFERENCES tweets(tweet_id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-`
 
 const COMMENT_TABLE = `
 CREATE TABLE IF NOT EXISTS comments (
@@ -128,4 +118,4 @@ const checkIfUserExistsAndInsertDefaults = async (conn: any) => {
     }
 }
 
-export { ROLE_TABLE, USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, checkIfRoleExistsAndInsertDefaults, checkIfUserExistsAndInsertDefaults }
+export { ROLE_TABLE, USER_TABLE, TWEET_TABLE, LIKES_TABLE, COMMENT_TABLE, checkIfRoleExistsAndInsertDefaults, checkIfUserExistsAndInsertDefaults }

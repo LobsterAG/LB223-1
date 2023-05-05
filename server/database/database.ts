@@ -1,6 +1,6 @@
 import mariadb from 'mariadb'
 import { Pool } from 'mariadb'
-import { USER_TABLE, TWEET_TABLE, LIKES_TABLE, DISLIKES_TABLE, COMMENT_TABLE, ROLE_TABLE, checkIfRoleExistsAndInsertDefaults, checkIfUserExistsAndInsertDefaults } from './schema'
+import * as schema from './schema'
 
 export class Database {
   // Properties
@@ -21,15 +21,14 @@ export class Database {
   private initializeDBSchema = async () => {
     console.log('Initializing DB schema...')
     const conn = await this.startTransaction()
-    await this.executeSQL(USER_TABLE, conn)
-    await this.executeSQL(ROLE_TABLE, conn)
-    await this.executeSQL(TWEET_TABLE, conn)
-    await this.executeSQL(LIKES_TABLE, conn)
-    await this.executeSQL(DISLIKES_TABLE, conn)
-    await this.executeSQL(COMMENT_TABLE, conn)
-    await this.executeSQL(ROLE_TABLE, conn)
-    await checkIfRoleExistsAndInsertDefaults(conn)
-    await checkIfUserExistsAndInsertDefaults(conn)
+    await this.executeSQL(schema.USER_TABLE, conn)
+    await this.executeSQL(schema.ROLE_TABLE, conn)
+    await this.executeSQL(schema.TWEET_TABLE, conn)
+    await this.executeSQL(schema.LIKES_TABLE, conn)
+    await this.executeSQL(schema.COMMENT_TABLE, conn)
+    await this.executeSQL(schema.ROLE_TABLE, conn)
+    await schema.checkIfRoleExistsAndInsertDefaults(conn)
+    await schema.checkIfUserExistsAndInsertDefaults(conn)
     this.commitTransaction(conn)
     console.log('DB schema initialized')
   }
