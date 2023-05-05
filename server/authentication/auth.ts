@@ -109,11 +109,11 @@ export class Authentication {
     // used for authenticating the user
     public authenticate(req: Request, res: Response, next: any) {
         // get the authorization header
-        const authHeader = req.headers.authorization
-        if (!authHeader) {
+        const cookie = req.cookies.authorization
+        if (!cookie) {
             return res.status(401).json({ message: 'Missing Authorization header' })
         }
-        const token = authHeader.split(' ')[1]
+        const token = cookie.split(' ')[1]
         if (!token) {
             return res.status(401).json({ message: 'Invalid token format' })
         }
