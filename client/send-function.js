@@ -51,7 +51,11 @@ function sendTwitt() {
           likeIcon.setAttribute("data-liked", "false");
           likeIcon.src = "img/like.svg";
         }
-      });      
+      });   
+      
+      deleteIcon.addEventListener('click', () => {
+        twittContainer.remove();
+    });
 }
 
 sendButton.addEventListener('click', sendTwitt);
