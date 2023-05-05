@@ -4,4 +4,4 @@ COPY . .
 RUN yarn
 RUN yarn build
 ENTRYPOINT ["yarn", "start"]
-EXPOSE 3000
+EXPOSE 4200
