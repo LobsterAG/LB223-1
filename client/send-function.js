@@ -1,68 +1,75 @@
-//Html elements
-const sendButton = document.getElementById('sendButton');
-const twittContainer = document.getElementById('twittContainer');
+$(document).ready(function () {
+    const $sendButton = $('#sendButton');
+    const $twittContainer = $('#twitts');
+    const $twitts = $('#twitts');
 
-function sendTwitt() {
-    console.log('work:)');
-    //Create a new HTML element in the memory and ad CSS
-    const twittContainer = document.createElement('div');
-    twittContainer.classList.add('twitt-container');
+    function sendTwitt() {
+        console.log('work:)');
+        //Create a new HTML element in the memory and ad CSS
+        const $twittContainer = $('<div></div>').addClass('twitt-container');
 
-    const twitt = document.createElement('p');
-    twitt.classList.add('twitts');
-    twitt.textContent = twittInput.value;
+        const $twitt = $('<p></p>').addClass('twitts').text($('#twittInput').val());
 
-    const iconsContainer = document.createElement('div');
-    iconsContainer.classList.add('icons-container');
+        const $iconsContainer = $('<div></div>').addClass('icons-container');
 
-    const likeIcon = document.createElement('img');
-    likeIcon.classList.add('icon');
-    likeIcon.src = 'img/like.svg';
-    iconsContainer.appendChild(likeIcon);
+        const $likeIcon = $('<img>').addClass('icon').attr('src', 'img/like.svg').attr('data-liked', 'false');
+        $iconsContainer.append($likeIcon);
 
-    const commentIcon = document.createElement('img');
-    commentIcon.classList.add('icon');
-    commentIcon.src = 'img/coment.svg';
-    iconsContainer.appendChild(commentIcon);
+        const $commentIcon = $('<img>').addClass('icon').attr('src', 'img/coment.svg');
+        $iconsContainer.append($commentIcon);
 
-    const editIcon = document.createElement('img');
-    editIcon.classList.add('icon');
-    editIcon.src = 'img/edit.svg';
-    iconsContainer.appendChild(editIcon);
+        const $editIcon = $('<img>').addClass('icon').attr('src', 'img/edit.svg');
+        $iconsContainer.append($editIcon);
 
-    const deleteIcon = document.createElement('img');
-    deleteIcon.classList.add('icon');
-    deleteIcon.src = 'img/delete.svg';
-    iconsContainer.appendChild(deleteIcon);
+        const $deleteIcon = $('<img>').addClass('icon').attr('src', 'img/delete.svg');
+        $iconsContainer.append($deleteIcon);
 
-    twittContainer.appendChild(twitt);
-    twittContainer.appendChild(iconsContainer);
-    twitts.appendChild(twittContainer);
+        $twittContainer.append($twitt);
+        $twittContainer.append($iconsContainer);
+        $twitts.append($twittContainer);
 
-    twittInput.value = '';
+        $('#twittInput').val('');
 
-    likeIcon.setAttribute("data-liked", "false");
+        $likeIcon.on('click', function () {
+            if ($(this).attr('data-liked') === 'false') {
+                $(this).attr('data-liked', 'true');
+                $(this).attr('src', 'img/like.png');
+            } else {
+                $(this).attr('data-liked', 'false');
+                $(this).attr('src', 'img/like.svg');
+            }
+        });
 
-    likeIcon.addEventListener("click", function() {
-        if (likeIcon.getAttribute("data-liked") === "false") {
-          likeIcon.setAttribute("data-liked", "true");
-          likeIcon.src = "img/like.png";
-        } else {
-          likeIcon.setAttribute("data-liked", "false");
-          likeIcon.src = "img/like.svg";
-        }
-      });   
-      
-      deleteIcon.addEventListener('click', () => {
-        twittContainer.remove();
-    });
-}
+        $commentIcon.on('click', function () {
+            const $commentInput = $('<input>').addClass('message-input');
+            const $commentButton = $('<button>').addClass('message-button').text('Comment');
 
-sendButton.addEventListener('click', sendTwitt);
+            $commentButton.on('click', function () {
+                const $commentContainer = $('<div></div>').addClass('comment-container');
+                const $comment = $('<p></p>').addClass('comment').text($commentInput.val());
 
-twittInput.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        sendTwitt();
+                $commentContainer.append($comment);
+                $twittContainer.append($commentContainer);
+
+                $commentInput.remove();
+                $commentButton.remove();
+            });
+
+            $twittContainer.append($commentInput);
+            $twittContainer.append($commentButton);
+        });
+
+        $deleteIcon.on('click', () => {
+            $twittContainer.remove();
+        });
     }
+
+    $sendButton.on('click', sendTwitt);
+
+    $('#twittInput').on('keydown', (event) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendTwitt();
+        }
+    });
 });
